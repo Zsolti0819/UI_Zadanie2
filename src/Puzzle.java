@@ -8,12 +8,6 @@ import java.util.Scanner;
 
 public class Puzzle {
 
-    /**
-     * 15 Puzzle Solver
-     *
-     * @param args
-     *            File to read initial puzzle states from
-     */
     public static void main(String args[]) {
 
         // Initial states of puzzles to solve

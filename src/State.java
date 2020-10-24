@@ -23,7 +23,7 @@ public class State {
     }
 
     /**
-     * @param board  4x4 game board array
+     * @param board  3x3 game board array
      */
     public State(byte[][] board) {
         this.board = board;
