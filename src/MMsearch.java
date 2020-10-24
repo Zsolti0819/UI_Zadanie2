@@ -142,10 +142,10 @@ public class MMsearch {
 
             // For each of the four possible operators
             for (State.Operator op : State.Operator.values()) {
-                // Create a new state that is the result of the move
-                State newState = s.move(op);
+                // Create a new state that is the result of the posun
+                State newState = s.posun(op);
 
-                // If the move is invalid
+                // If the posun is invalid
                 if (newState == null) {
                     continue;
                 }

@@ -1,102 +1,100 @@
-public class State {
+public class State extends Heuristiky {
 
     // 2D array representing game board where each element is a number
     // between 0 and 15 (0 is used for the blank tile)
-    private final byte[][] board;
+    public final byte[][] Tabulka;
 
     // Correct position of each tile to achieve this state
-    private Position[] correctPos;
+    private Pozicia[] AktualnaPozicia;
 
     enum Operator {
-        Up, Down, Left, Right;
+        Hore, Dole, Vlavo, Vpravo;
 
         public Operator reverse() {
-            if (this == Up)
-                return Down;
-            else if (this == Down)
-                return Up;
-            else if (this == Left)
-                return Right;
+            if (this == Hore)
+                return Dole;
+            else if (this == Dole)
+                return Hore;
+            else if (this == Vlavo)
+                return Vpravo;
             else
-                return Left;
+                return Vlavo;
         }
     }
 
-    /**
-     * @param board  3x3 game board array
-     */
-    public State(byte[][] board) {
-        this.board = board;
+
+    // parameter je tabulka, ktoru sme nacitali zo suboru
+    public State(byte[][] Tabulka) {
+        this.Tabulka = Tabulka;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+
+    // prechadzame celu tabulku, hladame 0,
+    // a ked ju najdeme nahradime zatvorkami []
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (byte[] row : board) {
-            for (byte tile : row) {
-                if (tile == 0)
+        for (byte[] riadok : Tabulka) {
+            for (byte dlazdica : riadok) {
+                if (dlazdica == 0)
                     sb.append("[] ");
                 else
-                    sb.append(String.format("%2d ", tile));
+                    sb.append(String.format("%2d ", dlazdica));
             }
             sb.append("\n");
         }
         return sb.toString();
     }
 
-    /**
-     * @param op  Operator to apply to state
-     * @return    Resulting state, or null if operation not possible
-     */
-    public State move(Operator op) {
+
+    // parameter je operator
+    // funkcia vrati stav, alebo 0, ak nie je mozne pouzit operatora
+    public State posun(Operator op) {
         // Create a new empty game board
-        byte[][] newBoard = new byte[3][3];
+        byte[][] novaTabulka = new byte[3][3];
 
         // Initialize the new board to the same as the current board
-        for (int row = 0; row < 3; row++)
-            for (int col = 0; col < 3; col++)
-                newBoard[row][col] = board[row][col];
+        for (int riadok = 0; riadok < 3; riadok++)
+            for (int stlpec = 0; stlpec < 3; stlpec++)
+                novaTabulka[riadok][stlpec] = Tabulka[riadok][stlpec];
 
-        // Find the location of the blank tile
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                if (board[row][col] == 0) {
+        // hladanie dlazdici
+        for (int riadok = 0; riadok < 3; riadok++) {
+            for (int stlpec = 0; stlpec < 3; stlpec++) {
+                if (Tabulka[riadok][stlpec] == 0) {
 
-                    // Try to apply the operation by moving the blank
-                    // tile in the specified direction
+                    // skusime aplikovat operatora
+                    // posunutim dlazdici na urcene miesto
                     switch (op) {
-                        case Up:
-                            if (row > 0) {
-                                newBoard[row][col] = board[row-1][col];
-                                newBoard[row-1][col] = 0;
+                        case Hore:
+                            if (riadok > 0) {
+                                novaTabulka[riadok][stlpec] = Tabulka[riadok-1][stlpec];
+                                novaTabulka[riadok-1][stlpec] = 0;
                             } else {
                                 return null;
                             }
                             break;
-                        case Down:
-                            if (row < 2) {
-                                newBoard[row][col] = board[row+1][col];
-                                newBoard[row+1][col] = 0;
+                        case Dole:
+                            if (riadok < 2) {
+                                novaTabulka[riadok][stlpec] = Tabulka[riadok+1][stlpec];
+                                novaTabulka[riadok+1][stlpec] = 0;
                             } else {
                                 return null;
                             }
                             break;
-                        case Left:
-                            if (col > 0) {
-                                newBoard[row][col] = board[row][col-1];
-                                newBoard[row][col-1] = 0;
+                        case Vlavo:
+                            if (stlpec > 0) {
+                                novaTabulka[riadok][stlpec] = Tabulka[riadok][stlpec-1];
+                                novaTabulka[riadok][stlpec-1] = 0;
                             } else {
                                 return null;
                             }
                             break;
-                        case Right:
-                            if (col < 2) {
-                                newBoard[row][col] = board[row][col+1];
-                                newBoard[row][col+1] = 0;
+                        case Vpravo:
+                            if (stlpec < 2) {
+                                novaTabulka[riadok][stlpec] = Tabulka[riadok][stlpec+1];
+                                novaTabulka[riadok][stlpec+1] = 0;
                             } else {
                                 return null;
                             }
@@ -105,13 +103,9 @@ public class State {
                 }
             }
         }
-        // Create and return a new State object using the new board
-        return new State(newBoard);
+        return new State(novaTabulka);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
@@ -123,64 +117,62 @@ public class State {
         State other = (State) obj;
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
-                if (board[i][j] != other.board[i][j])
+                if (Tabulka[i][j] != other.Tabulka[i][j])
                     return false;
 
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         int hash = 3;
-        for (byte[] row : board)
-            for (byte tile : row)
-                hash = 7*hash+tile;
+        for (byte[] riadok : Tabulka)
+            for (byte dlazdica : riadok)
+                hash = 7*hash+dlazdica;
 
         return hash;
     }
 
     /**
-     * @param goal  Goal state
+     * @param ciel  Goal state
      * @return Array of positions for each of the 15 tiles
      */
-    public Position[] getCorrectPositions(State goal) {
-        if (goal.correctPos == null) {
-            goal.correctPos = new Position[9];
 
-            // Finds the correct position of each tile using the goal state
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    if (goal.board[row][col] != 0) {
-                        goal.correctPos[goal.board[row][col]] = new Position(row, col);
+    // parameter je cielovy stav
+    // vrati pole pozicii pre kazdu dlazdicu
+    public Pozicia[] vratitSpravnuPoziciu(State ciel) {
+        if (ciel.AktualnaPozicia == null) {
+            ciel.AktualnaPozicia = new Pozicia[9];
+
+            // najde spravnu poziciu kazdej dlazdice
+            for (int riadok = 0; riadok < 3; riadok++) {
+                for (int stlpec = 0; stlpec < 3; stlpec++) {
+                    if (ciel.Tabulka[riadok][stlpec] != 0) {
+                        ciel.AktualnaPozicia[ciel.Tabulka[riadok][stlpec]] = new Pozicia(riadok, stlpec);
                     }
                 }
             }
         }
-        return goal.correctPos;
+        return ciel.AktualnaPozicia;
     }
 
-    /**
-     * @param goal  Goal state to calculate manhattan distance from
-     * @return  Manhattan distance from goal state
-     */
-    public short manhattanDistance(State goal)
+    // parameter je cielovy stav od ktoreho vypocitame manhattansku vzdialenost
+    public int manhattanDistance(State goal)
     {
         short manhattan = 0;
 
-        Position[] correctPos = getCorrectPositions(goal);
+
+        Pozicia[] spravnaPozicia = vratitSpravnuPoziciu(goal);
 
         // Compare each tile's actual row and column to the correct row
         // and column, compute Manhattan distance, and add to sum.
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                byte tile = board[row][col];
+        for (int riadok = 0; riadok < 3; riadok++) {
+            for (int stlpec = 0; stlpec < 3; stlpec++) {
+                byte dlazdica = Tabulka[riadok][stlpec];
 
-                if (tile != 0) {
-                    manhattan += Math.abs(correctPos[tile].row-row);
-                    manhattan += Math.abs(correctPos[tile].col-col);
+                if (dlazdica != 0) {
+                    manhattan += Math.abs(spravnaPozicia[dlazdica].riadok -riadok);
+                    manhattan += Math.abs(spravnaPozicia[dlazdica].stlpec -stlpec);
                 }
             }
         }
@@ -197,7 +189,7 @@ public class State {
      * @param goal  Goal state to calculate linear conflict heuristic distance from
      * @return  Linear conflict heuristic distance from goal state
      */
-    public short h(State goal)
+    public int h(State goal)
     {
         if (!Config.LinearConflict) {
             return manhattanDistance(goal);
@@ -205,48 +197,48 @@ public class State {
         // Required number moves to remove all linear conflicts
         int reqMoves = 0;
 
-        Position[] correctPos = getCorrectPositions(goal);
+        Pozicia[] spravnaPozicia = vratitSpravnuPoziciu(goal);
 
         // Number or horizontal and vertical conflicts a particular
         // tile is involved in
-        int hConflicts[][] = new int[3][3];
-        int vConflicts[][] = new int[3][3];
+        int[][] horizontalneKonflikty = new int[3][3];
+        int[][] vertikalneKonflikty = new int[3][3];
 
-        // conflictCount[i] is the number of tiles in a row or column
+        // pocetKonfliktov[i] is the number of tiles in a row or column
         // that have i conflicts with other tiles in the same row/column
-        int conflictCount[];
+        int[] pocetKonfliktov;
 
         // For each non-blank tile on the board
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                if (board[i][j] != 0) {
+                if (Tabulka[i][j] != 0) {
                     // If the tile is in its goal row
-                    if (correctPos[board[i][j]].row == i) {
+                    if (spravnaPozicia[Tabulka[i][j]].riadok == i) {
                         // For each of the following tiles in the row
                         for (int k = j + 1; k < 3; k++) {
                             // If the second tile is also in its goal row
                             // and the two tiles are in the wrong relative order
                             // then increase the conflict count for both tiles
-                            if (board[i][k] != 0 &&
-                                    correctPos[board[i][k]].row == i &&
-                                    correctPos[board[i][k]].col < correctPos[board[i][j]].col) {
-                                hConflicts[i][k]++;
-                                hConflicts[i][j]++;
+                            if (Tabulka[i][k] != 0 &&
+                                    spravnaPozicia[Tabulka[i][k]].riadok == i &&
+                                    spravnaPozicia[Tabulka[i][k]].stlpec < spravnaPozicia[Tabulka[i][j]].stlpec) {
+                                horizontalneKonflikty[i][k]++;
+                                horizontalneKonflikty[i][j]++;
                             }
                         }
                     }
                     // If the tile is in its goal column
-                    if (correctPos[board[i][j]].col == j) {
+                    if (spravnaPozicia[Tabulka[i][j]].stlpec == j) {
                         // For each of the following tiles in the column
                         for (int k = i + 1; k < 3; k++) {
                             // If the second tile is also in its goal column
                             // and the two tiles are in the wrong relative order
                             // then increase the conflict count for both tiles
-                            if (board[k][j] != 0 &&
-                                    correctPos[board[k][j]].col == j &&
-                                    correctPos[board[k][j]].row < correctPos[board[i][j]].row) {
-                                vConflicts[k][j]++;
-                                vConflicts[i][j]++;
+                            if (Tabulka[k][j] != 0 &&
+                                    spravnaPozicia[Tabulka[k][j]].stlpec == j &&
+                                    spravnaPozicia[Tabulka[k][j]].riadok < spravnaPozicia[Tabulka[i][j]].riadok) {
+                                vertikalneKonflikty[k][j]++;
+                                vertikalneKonflikty[i][j]++;
                             }
                         }
                     }
@@ -256,25 +248,25 @@ public class State {
 
         // For each row, add number of moves to eliminate conflicts to required moves
         for (int i = 0; i < 3; i++) {
-            conflictCount = new int[3];
+            pocetKonfliktov = new int[3];
             for (int j = 0; j < 3; j++) {
-                conflictCount[hConflicts[i][j]]++;
+                pocetKonfliktov[horizontalneKonflikty[i][j]]++;
             }
-            reqMoves += movesForConflicts(conflictCount);
+            reqMoves += movesForConflicts(pocetKonfliktov);
         }
 
         // For each column, add number of moves to eliminate conflicts to required moves
         for (int j = 0; j < 3; j++) {
-            conflictCount = new int[3];
+            pocetKonfliktov = new int[3];
             for (int i = 0; i < 3; i++) {
-                conflictCount[vConflicts[i][j]]++;
+                pocetKonfliktov[vertikalneKonflikty[i][j]]++;
             }
-            reqMoves += movesForConflicts(conflictCount);
+            reqMoves += movesForConflicts(pocetKonfliktov);
         }
 
         // Return the sum of the Manhattan distance and the additional
         // required moves to resolve conflicts
-        return (short) (reqMoves + manhattanDistance(goal));
+        return  reqMoves + manhattanDistance(goal);
     }
 
     /**
@@ -283,15 +275,14 @@ public class State {
      */
     private int movesForConflicts(int[] conflictCount)
     {
-        // If every tile has 0 conflicts
-        // Matches 1234
+        // ak dlazdice su v spravnom poradi
         if (conflictCount[0] == 3)
             return 0; // No additional moves required
 
             // If every tile has 3 conflicts
             // Matches 4321
         else if (conflictCount[2] == 3)
-            return 4; // 6 additional moves required
+            return 5; // 6 additional moves required
 
 
             // If 2 tiles have 1 conflict each
@@ -306,4 +297,5 @@ public class State {
         else
             return 3; // 4 additional moves required
     }
+
 }

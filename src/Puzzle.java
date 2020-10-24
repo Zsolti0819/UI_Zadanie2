@@ -60,7 +60,7 @@ public class Puzzle {
             System.out.println("Initial state: \n" + initial + "\n========================\n");
 
             System.out.println("Running MM manhattanDistance+linearConflict\n--------------------------");
-            Config.MMε = 0;
+            // Config.MMε = 0;
             Config.LinearConflict = true;
             {
                 Instant start = Instant.now();
@@ -73,10 +73,9 @@ public class Puzzle {
                 }
             }
             System.out.print("\n");
-
 
             System.out.println("Running MM manhattanDistance\n--------------------------");
-            Config.MMε = 0;
+            // Config.MMε = 0;
             Config.LinearConflict = false;
             {
                 Instant start = Instant.now();
@@ -89,41 +88,6 @@ public class Puzzle {
                 }
             }
             System.out.print("\n");
-
-
-            System.out.println("Running MMε manhattanDistance+linearConflict\n--------------------------");
-            Config.MMε = 1;
-            Config.LinearConflict = true;
-            {
-                Instant start = Instant.now();
-                Node[] solution = MMsearch.MMSolve(initial, goal);
-                Instant end = Instant.now();
-                if (solution == null) {
-                    System.out.println("No solution Found!");
-                } else {
-                    System.out.println("Run time: " + Duration.between(start, end));
-                }
-            }
-            System.out.print("\n");
-
-
-            System.out.println("Running MMε manhattanDistance\n--------------------------");
-            Config.MMε = 1;
-            Config.LinearConflict = false;
-            {
-                Instant start = Instant.now();
-                Node[] solution = MMsearch.MMSolve(initial, goal);
-                Instant end = Instant.now();
-                if (solution == null) {
-                    System.out.println("No solution Found!");
-                } else {
-                    System.out.println("Run time: " + Duration.between(start, end));
-                }
-            }
-            System.out.print("\n");
-
-
-
             System.out.println("\n==========================");
 
         }
