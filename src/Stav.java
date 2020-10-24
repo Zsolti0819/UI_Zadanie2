@@ -1,8 +1,8 @@
-public class State extends Heuristiky {
+public class Stav {
 
     // 2D array representing game board where each element is a number
     // between 0 and 15 (0 is used for the blank tile)
-    public final byte[][] Tabulka;
+    public final int[][] Tabulka;
 
     // Correct position of each tile to achieve this state
     private Pozicia[] AktualnaPozicia;
@@ -24,7 +24,7 @@ public class State extends Heuristiky {
 
 
     // parameter je tabulka, ktoru sme nacitali zo suboru
-    public State(byte[][] Tabulka) {
+    public Stav(int[][] Tabulka) {
         this.Tabulka = Tabulka;
     }
 
@@ -35,8 +35,8 @@ public class State extends Heuristiky {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (byte[] riadok : Tabulka) {
-            for (byte dlazdica : riadok) {
+        for (int[] riadok : Tabulka) {
+            for (int dlazdica : riadok) {
                 if (dlazdica == 0)
                     sb.append("[] ");
                 else
@@ -50,14 +50,13 @@ public class State extends Heuristiky {
 
     // parameter je operator
     // funkcia vrati stav, alebo 0, ak nie je mozne pouzit operatora
-    public State posun(Operator op) {
+    public Stav posun(Operator op) {
         // Create a new empty game board
-        byte[][] novaTabulka = new byte[3][3];
+        int[][] novaTabulka = new int[3][3];
 
-        // Initialize the new board to the same as the current board
+        // inicializacia novej tabulky na aktualnu
         for (int riadok = 0; riadok < 3; riadok++)
-            for (int stlpec = 0; stlpec < 3; stlpec++)
-                novaTabulka[riadok][stlpec] = Tabulka[riadok][stlpec];
+            System.arraycopy(Tabulka[riadok], 0, novaTabulka[riadok], 0, 3);
 
         // hladanie dlazdici
         for (int riadok = 0; riadok < 3; riadok++) {
@@ -103,7 +102,7 @@ public class State extends Heuristiky {
                 }
             }
         }
-        return new State(novaTabulka);
+        return new Stav(novaTabulka);
     }
 
     @Override
@@ -114,7 +113,7 @@ public class State extends Heuristiky {
         if (obj == null || obj.getClass() != this.getClass())
             return false;
 
-        State other = (State) obj;
+        Stav other = (Stav) obj;
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
                 if (Tabulka[i][j] != other.Tabulka[i][j])
@@ -126,8 +125,8 @@ public class State extends Heuristiky {
     @Override
     public int hashCode() {
         int hash = 3;
-        for (byte[] riadok : Tabulka)
-            for (byte dlazdica : riadok)
+        for (int[] riadok : Tabulka)
+            for (int dlazdica : riadok)
                 hash = 7*hash+dlazdica;
 
         return hash;
@@ -140,7 +139,7 @@ public class State extends Heuristiky {
 
     // parameter je cielovy stav
     // vrati pole pozicii pre kazdu dlazdicu
-    public Pozicia[] vratitSpravnuPoziciu(State ciel) {
+    public Pozicia[] vratitSpravnuPoziciu(Stav ciel) {
         if (ciel.AktualnaPozicia == null) {
             ciel.AktualnaPozicia = new Pozicia[9];
 
@@ -157,18 +156,16 @@ public class State extends Heuristiky {
     }
 
     // parameter je cielovy stav od ktoreho vypocitame manhattansku vzdialenost
-    public int manhattanDistance(State goal)
+    public int manhattanDistance(Stav ciel)
     {
-        short manhattan = 0;
-
-
-        Pozicia[] spravnaPozicia = vratitSpravnuPoziciu(goal);
+        int manhattan = 0;
+        Pozicia[] spravnaPozicia = vratitSpravnuPoziciu(ciel);
 
         // Compare each tile's actual row and column to the correct row
         // and column, compute Manhattan distance, and add to sum.
         for (int riadok = 0; riadok < 3; riadok++) {
             for (int stlpec = 0; stlpec < 3; stlpec++) {
-                byte dlazdica = Tabulka[riadok][stlpec];
+                int dlazdica = Tabulka[riadok][stlpec];
 
                 if (dlazdica != 0) {
                     manhattan += Math.abs(spravnaPozicia[dlazdica].riadok -riadok);
@@ -180,16 +177,7 @@ public class State extends Heuristiky {
         return manhattan;
     }
 
-    /**
-     * Linear conflict heuristic.
-     * Returns the sum of the Manhattan distance and the additional
-     * moves required to eliminate conflicts between tiles that are in
-     * their goal row or column but in the wrong order.
-     *
-     * @param goal  Goal state to calculate linear conflict heuristic distance from
-     * @return  Linear conflict heuristic distance from goal state
-     */
-    public int h(State goal)
+    public int linearConflict(Stav goal)
     {
         if (!Config.LinearConflict) {
             return manhattanDistance(goal);
@@ -208,57 +196,57 @@ public class State extends Heuristiky {
         // that have i conflicts with other tiles in the same row/column
         int[] pocetKonfliktov;
 
-        // For each non-blank tile on the board
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        int i = 0;
+        int j = 0;
+        int k;
+
+        while (i < 3) {
+            while (j < 3) {
                 if (Tabulka[i][j] != 0) {
-                    // If the tile is in its goal row
-                    if (spravnaPozicia[Tabulka[i][j]].riadok == i) {
-                        // For each of the following tiles in the row
-                        for (int k = j + 1; k < 3; k++) {
-                            // If the second tile is also in its goal row
-                            // and the two tiles are in the wrong relative order
-                            // then increase the conflict count for both tiles
-                            if (Tabulka[i][k] != 0 &&
-                                    spravnaPozicia[Tabulka[i][k]].riadok == i &&
-                                    spravnaPozicia[Tabulka[i][k]].stlpec < spravnaPozicia[Tabulka[i][j]].stlpec) {
-                                horizontalneKonflikty[i][k]++;
+                    if (spravnaPozicia[Tabulka[i][j]].riadok == i) {                                                    // ak dlazdica je v spravnom riadku
+                        k = j + 1;
+                        while (k < 3) {                                                                                 // tak pre kazdu dlazdicu v tom riadku
+                            //System.out.println("spravnaPozicia[Tabulka[i][k]].riadok:" + spravnaPozicia[Tabulka[i][k]].riadok);
+                            if (Tabulka[i][k] != 0 &&                                                                   // dlazdica nie je prazdne miesto
+                                    spravnaPozicia[Tabulka[i][k]].riadok == i &&                                        // nasledujuca dlazdica napravo je tiez v spravnom riadku
+                                    spravnaPozicia[Tabulka[i][k]].stlpec < spravnaPozicia[Tabulka[i][j]].stlpec) {      // ale dlazdice su v nespravnom poradi
+                                horizontalneKonflikty[i][k]++;                                                          // zvysujeme pocet konfilktov pre obe dlazdice
                                 horizontalneKonflikty[i][j]++;
                             }
+                            k++;
                         }
                     }
-                    // If the tile is in its goal column
-                    if (spravnaPozicia[Tabulka[i][j]].stlpec == j) {
-                        // For each of the following tiles in the column
-                        for (int k = i + 1; k < 3; k++) {
-                            // If the second tile is also in its goal column
-                            // and the two tiles are in the wrong relative order
-                            // then increase the conflict count for both tiles
-                            if (Tabulka[k][j] != 0 &&
-                                    spravnaPozicia[Tabulka[k][j]].stlpec == j &&
-                                    spravnaPozicia[Tabulka[k][j]].riadok < spravnaPozicia[Tabulka[i][j]].riadok) {
-                                vertikalneKonflikty[k][j]++;
+                    if (spravnaPozicia[Tabulka[i][j]].stlpec == j) {                                                    // ak dlazdica je v spravnom stlpci
+                        k = i + 1;
+                        while (k < 3) {                                                                                 // tak pre kazdu dlazdicu v tom stlpci
+                            if (Tabulka[k][j] != 0 &&                                                                   // dlazdica nie je prazdne miesto
+                                    spravnaPozicia[Tabulka[k][j]].stlpec == j &&                                        // nasledujuca dlazdica dole je tiez v spravnom stlpci
+                                    spravnaPozicia[Tabulka[k][j]].riadok < spravnaPozicia[Tabulka[i][j]].riadok) {      // ale dlazdice sa v nespravnom poradi
+                                vertikalneKonflikty[k][j]++;                                                            // zvysujeme pocet konfilktov pre obe dlazdice
                                 vertikalneKonflikty[i][j]++;
                             }
+                            k++;
                         }
                     }
                 }
+                j++;
             }
+            i++;
         }
 
         // For each row, add number of moves to eliminate conflicts to required moves
-        for (int i = 0; i < 3; i++) {
+        for (i = 0; i < 3; i++) {
             pocetKonfliktov = new int[3];
-            for (int j = 0; j < 3; j++) {
+            for (j = 0; j < 3; j++) {
                 pocetKonfliktov[horizontalneKonflikty[i][j]]++;
             }
             reqMoves += movesForConflicts(pocetKonfliktov);
         }
 
         // For each column, add number of moves to eliminate conflicts to required moves
-        for (int j = 0; j < 3; j++) {
+        for (j = 0; j < 3; j++) {
             pocetKonfliktov = new int[3];
-            for (int i = 0; i < 3; i++) {
+            for (i = 0; i < 3; i++) {
                 pocetKonfliktov[vertikalneKonflikty[i][j]]++;
             }
             reqMoves += movesForConflicts(pocetKonfliktov);
@@ -277,7 +265,7 @@ public class State extends Heuristiky {
     {
         // ak dlazdice su v spravnom poradi
         if (conflictCount[0] == 3)
-            return 0; // No additional moves required
+            return 0;
 
             // If every tile has 3 conflicts
             // Matches 4321
