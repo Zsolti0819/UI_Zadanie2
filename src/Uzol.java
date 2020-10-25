@@ -7,18 +7,18 @@ public class Uzol implements Comparable<Uzol> {
     private final int heuristika;
     private final int priorita;
 
-    public Uzol(Stav stav, Uzol predchadzajuci, Stav.Operator operator, int heuristika) {
+    public Uzol(Stav stav, Uzol predchadzajuci, Stav.Operator operator, int heuristika)
+    {
         this.stav = stav;
         this.predchadzajuci = predchadzajuci;
         this.operator = operator;
         this.heuristika = heuristika;
 
-        // nastavime hlbku prve uzla (koren) na 0
-        if (predchadzajuci == null) {
+        if (predchadzajuci == null)
             this.hlbka = 0;
-        } else { // ostatne uzli maju hlbku hlbka predka + 1
+        else  // ostatne uzli maju hlbku hlbka predka + 1
             this.hlbka = (short)(predchadzajuci.hlbka + 1);
-        }
+
         priorita = Math.max(2* hlbka, hlbka + this.heuristika);
     }
 
@@ -50,26 +50,26 @@ public class Uzol implements Comparable<Uzol> {
         return stav;
     }
 
-    // zo zaciatocneho uzla k aktualnej
-    public String pathToString() {
+    public String cestaZoStartuKaktualnej()
+    {
         if (predchadzajuci != null)
-            return predchadzajuci.pathToString() + "\n" + operator + "\n" + stav;
+            return predchadzajuci.cestaZoStartuKaktualnej() + "\n" + operator + "\n" + stav;
         else
-            return "\nInitial Stav:\n" + stav;
+            return "\nZaciatocny  stav:\n" + stav;
     }
 
-    // z aktualnej uzli do cielovej, vynechame prvy
-    public String revPathToStringSkipFirst() {
+    public String cestaNaspatVynechajPrvu()
+    {
         if (predchadzajuci != null)
-            return "\n" + operator.reverse() + "\n" + predchadzajuci.revPathToString();
+            return "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat();
         else
             return "\n" + operator.reverse() + "\n";
     }
 
-    // z aktualnej uzli do cielovej
-    public String revPathToString() {
+    public String cestaNaspat()
+    {
         if (predchadzajuci != null)
-            return stav + "\n" + operator.reverse() + "\n" + predchadzajuci.revPathToString();
+            return stav + "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat();
         else
             return stav.toString();
     }

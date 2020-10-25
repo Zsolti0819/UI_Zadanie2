@@ -52,7 +52,7 @@ public class Main {
         {
 
             // Read numbers from the line
-            while ((hodnotaTest2 = br2.readLine()) != null) { // Stop reading file when -1 is reached
+            while ((hodnotaTest2 = br2.readLine()) != null) {
                 Scanner scanner2 = new Scanner(hodnotaTest2);
                 while (scanner2.hasNextInt())
                 {
@@ -86,16 +86,16 @@ public class Main {
             Scanner scanner = new Scanner(System.in);
             String choice = scanner.next();
 
-            if (choice.equalsIgnoreCase("ano")) {
+            if (choice.equalsIgnoreCase("ano"))
+            {
                 System.out.println("Riesenie hlavolamu zacalo.\nPouzite heuristiky: Manhattan distance + Linear conflict");
                 Instant start = Instant.now();
                 Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, true);
                 Instant koniec = Instant.now();
-                if (riesenie == null) {
+                if (riesenie == null)
                     System.out.println("Nema riesenie!");
-                } else {
+                else
                     System.out.println("Beh programu: " + Duration.between(start, koniec));
-                }
 
             }
             else {
@@ -103,11 +103,10 @@ public class Main {
                 Instant start = Instant.now();
                 Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, false);
                 Instant koniec = Instant.now();
-                if (riesenie == null) {
+                if (riesenie == null)
                     System.out.println("Nema riesenie!");
-                } else {
+                else
                     System.out.println("Beh programu: " + Duration.between(start, koniec));
-                }
             }
         }
     }

@@ -25,22 +25,21 @@ public class Algoritmus {
         List<Queue<Uzol>> celkovaPrioritaOtvorenaHalda = new ArrayList<>(2);
 
         // Porovnavanie uzlov pomocou Comparatora.
-        // Na prioritu nie je potrebne implementovat vlastnu funkciu, lebo java poskytuje tuto funkciu
-        // Vrati hodnotu -1 ak Uzol a ma mensiu hodnotu, ako Uzol b
-        // Vrati hodnotu 0 ak maju rovnaku hodnotu
-        // Vrati hodnotu 1 ak Uzol a ma vacsiu hodnotu ako Uzol b
+        // Pre prioritu nie je potrebne implementovat vlastnu funkciu, lebo java poskytuje tuto funkciu
         Comparator<Uzol> PrioritaNaZakladeHlbky = Comparator.comparingInt(Uzol::getHlbka);
         Comparator<Uzol> CelkovaPriorita = (a, b) -> {
             if (a.getPriorita() < b.getPriorita())
                 return -1;
-            else if (a.getPriorita() == b.getPriorita()) {
+            else if (a.getPriorita() == b.getPriorita())
                 return Integer.compare(a.getHlbka(), b.getHlbka());
-            } else
+            else
                 return 1;
         };
 
 
-        // hash tabulky, ako kluce su stavy uzlov a uzli ako data pre zistenie ci stav je zatvoreny alebo otvoreny set
+        // hash tabulky
+        // kluce su stavy uzlov
+        // uzli su ako data, sluzi na to, aby sme zistili, ci dany stav je v otvorenom alebo zatvorenom setu
         List<Map<Stav, Uzol>> otvorenyHash = new ArrayList<>(2);
         List<Map<Stav, Uzol>> zatvorenyHash = new ArrayList<>(2);
 
@@ -49,45 +48,43 @@ public class Algoritmus {
 
         for (int i : smery)
         {
-            // vytvorime prazdne haldy a hash mapy
+            // vytvorime prazdne haldy
             prioritaOtvorenaHalda.add(new PriorityQueue<>());
             hlbkaOtvorenaHalda.add(new PriorityQueue<>(PrioritaNaZakladeHlbky));
             celkovaPrioritaOtvorenaHalda.add(new PriorityQueue<>(CelkovaPriorita));
+            // a hash mapy
             otvorenyHash.add(new HashMap<>());
             zatvorenyHash.add(new HashMap<>());
 
             // vlozime prvy uzol do otvoreneho setu
-            Uzol n = new Uzol(zaciatocny[i], null, null, zaciatocny[i].linearConflict(cielovy[i],linearConflict));
-            otvorenyHash.get(i).put(zaciatocny[i], n);
-            prioritaOtvorenaHalda.get(i).add(n);
-            hlbkaOtvorenaHalda.get(i).add(n);
-            celkovaPrioritaOtvorenaHalda.get(i).add(n);
+            Uzol prvy = new Uzol(zaciatocny[i], null, null, zaciatocny[i].linearConflict(cielovy[i],linearConflict));
+            otvorenyHash.get(i).put(zaciatocny[i], prvy);
+            prioritaOtvorenaHalda.get(i).add(prvy);
+            hlbkaOtvorenaHalda.get(i).add(prvy);
+            celkovaPrioritaOtvorenaHalda.get(i).add(prvy);
         }
 
-
         // kym su prvky v otvorenom setu
-        while(!prioritaOtvorenaHalda.get(dopredu).isEmpty() && !prioritaOtvorenaHalda.get(dozadu).isEmpty()) {
+        while(!prioritaOtvorenaHalda.get(dopredu).isEmpty() && !prioritaOtvorenaHalda.get(dozadu).isEmpty())
+        {
             // uzol s najnizsou prioritou
             int fwdPriority = celkovaPrioritaOtvorenaHalda.get(dopredu).peek().getPriorita();
             int C = Math.min(fwdPriority, celkovaPrioritaOtvorenaHalda.get(dozadu).peek().getPriorita());
 
             // stop condition: test U
-            if (U<=Math.max(Math.max(C, prioritaOtvorenaHalda.get(dopredu).peek().getFScore()),Math.max(
-                    prioritaOtvorenaHalda.get(dozadu).peek().getFScore(),
-                    hlbkaOtvorenaHalda.get(dopredu).peek().getHlbka()+
-                            hlbkaOtvorenaHalda.get(dozadu).peek().getHlbka()+1
-            ))) {
+            if (U <= Math.max(Math.max(C, prioritaOtvorenaHalda.get(dopredu).peek().getFScore()),Math.max(prioritaOtvorenaHalda.get(dozadu).peek().getFScore(), hlbkaOtvorenaHalda.get(dopredu).peek().getHlbka()+ hlbkaOtvorenaHalda.get(dozadu).peek().getHlbka()+1)))
+            {
+                int pocetUzlovOtv = otvorenyHash.get(dopredu).size() + otvorenyHash.get(dozadu).size() + 1;
+                int pocetUzlovZatv = zatvorenyHash.get(dopredu).size() + zatvorenyHash.get(dozadu).size();
 
-                int openNodeCount = otvorenyHash.get(dopredu).size() + otvorenyHash.get(dozadu).size() + 1;
-                int closedNodeCount = zatvorenyHash.get(dopredu).size() + zatvorenyHash.get(dozadu).size();
-
-                System.out.print("Vytvorene uzli: " + (openNodeCount + closedNodeCount));
-                System.out.print(" (" + openNodeCount + " otvorene/");
-                System.out.println(closedNodeCount + " zatvorene)");
+                System.out.print("Vytvorene uzli: " + (pocetUzlovOtv + pocetUzlovZatv));
+                System.out.print(" (" + pocetUzlovOtv + " otvorene/");
+                System.out.println(pocetUzlovZatv + " zatvorene)");
                 System.out.println("Dlzka cesty: " + U);
 
-                return new Uzol[]{}; // TODO -  retrace the path
-            } else if (U <= C) {
+                return new Uzol[]{};
+            }
+            else if (U <= C) {
                 System.out.println("U >= C, but not meeting stop condition!!");
                 return null;
             }
@@ -99,6 +96,7 @@ public class Algoritmus {
             // minimum
             Uzol n = celkovaPrioritaOtvorenaHalda.get(smer).poll();
 
+            assert n != null;
             Stav s = n.getStav();
 
             // premiestnime uzol z otvoreneho setu, vlozimo ho to zatvoreneho, a odstranime ho z haldy
@@ -159,8 +157,9 @@ public class Algoritmus {
                     else
                         System.out.println("Found path: Forward depth:" + matchedUzol.getHlbka() + " backward depth: " + novyUzol.getHlbka());
 
-                    System.out.println(novyUzol.pathToString());
-                    System.out.println(matchedUzol.revPathToStringSkipFirst());
+                    System.out.println(novyUzol.cestaZoStartuKaktualnej());
+                    System.out.println("Uzli sa stretli tu:");
+                    System.out.println(matchedUzol.cestaNaspat());
 
                 }
             }

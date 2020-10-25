@@ -1,4 +1,3 @@
-
 public class Pozicia {
     public int riadok, stlpec;
 
