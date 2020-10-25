@@ -4,26 +4,33 @@ import java.time.Instant;
 import java.util.Scanner;
 
 public class Main {
-
+    public static int rozmer;
 
     public static void main(String[] args) throws IOException {
 
         // Nacitavam zaciatocny stav zo suboru zaciatok.txt
         // Zistim pocet cisel v subore, a podla toho prekopirujem cisla do dvojrozmerneho pola
         // Funguje len pre 3x3 a 4x4
-        BufferedReader br;
-        int[] cisla = new int[17];
-        br = new BufferedReader(new FileReader("txt/zaciatok.txt"));
-        int hodnota;
+        int[] cisla = new int[50];
         int pocetCisel = 0;
-        while ((hodnota = br.read()) != -1) {
-            if (hodnota != ' ')
-            {
-                int cislo = Character.getNumericValue(hodnota);
-                cisla[pocetCisel++] = cislo;
+        String hodnotaTest;
+        try (BufferedReader br = new BufferedReader(new FileReader("txt/zaciatok.txt")))
+        {
+            // Read numbers from the line
+            while ((hodnotaTest = br.readLine()) != null) { // Stop reading file when -1 is reached
+                Scanner scanner = new Scanner(hodnotaTest);
+                while (scanner.hasNextInt())
+                {
+                    int start = scanner.nextInt();
+                    if (start == -1)
+                        break;
+                    cisla[pocetCisel++] = start;
+                }
+
             }
+        } catch (IOException e) {
+            throw new IOException("Error processing the file.");
         }
-        br.close();
 
         int odmocninaCisla = (int) Math.sqrt(pocetCisel);
         int pocetCiselPom = 0;
@@ -38,19 +45,26 @@ public class Main {
 
         // Nacitavam cielovy stav zo suboru ciel.txt
         // Ostatne su to iste ako pre zaciatok
-        BufferedReader br2;
-        int[] cisla2 = new int[17];
-        br2 = new BufferedReader(new FileReader("txt/ciel.txt"));
-        int hodnota2;
+        int[] cisla2 = new int[50];
         int pocetCisel2 = 0;
-        while ((hodnota2 = br2.read()) != -1) {
-            if (hodnota2 != ' ')
-            {
-                int cislo2 = Character.getNumericValue(hodnota2);
-                cisla2[pocetCisel2++] = cislo2;
+        String hodnotaTest2;
+        try (BufferedReader br2 = new BufferedReader(new FileReader("txt/ciel.txt")))
+        {
+
+            // Read numbers from the line
+            while ((hodnotaTest2 = br2.readLine()) != null) { // Stop reading file when -1 is reached
+                Scanner scanner2 = new Scanner(hodnotaTest2);
+                while (scanner2.hasNextInt())
+                {
+                    int start = scanner2.nextInt();
+                    if (start == -1)
+                        break;
+                    cisla2[pocetCisel2++] = start;
+                }
             }
+        } catch (IOException e) {
+            throw new IOException("Error processing the file.");
         }
-        br2.close();
 
         int odmocninaCisla2 = (int) Math.sqrt(pocetCisel2);
         int pocetCiselPom2 = 0;
@@ -61,43 +75,40 @@ public class Main {
                 cielovaTabulka[i][j] = cisla2[pocetCiselPom2++];
         }
         Stav ciel = new Stav(cielovaTabulka);
+        rozmer = (int) Math.sqrt(pocetCisel);
 
         if (pocetCisel == pocetCisel2)
-            System.out.println("GG\n");
-
-        System.out.println("Pocet cisel: "+pocetCisel+"\nPocet cisel 2: "+pocetCisel2);
-
-
-        System.out.println("Initial state: \n" + zaciatok + "\n========================\n");
-
-        System.out.println("Running MM manhattanDistance+linearConflict\n--------------------------");
-        Config.LinearConflict = true;
         {
-            Instant start = Instant.now();
-            Uzol[] riesenie = Algoritmus.start(zaciatok, ciel);
-            Instant koniec = Instant.now();
-            if (riesenie == null) {
-                System.out.println("Nema riesenie!");
-            } else {
-                System.out.println("Run time: " + Duration.between(start, koniec));
+            System.out.println("Zaciatocny stav: \n" + zaciatok + "\n====================\n");
+            System.out.println("Cielovy stav: \n" + ciel + "\n====================\n");
+
+            System.out.println("Chcete riesit hlavolam pomocou linear conflict heuristiky? ano/nie");
+            Scanner scanner = new Scanner(System.in);
+            String choice = scanner.next();
+
+            if (choice.equalsIgnoreCase("ano")) {
+                System.out.println("Riesenie hlavolamu zacalo.\nPouzite heuristiky: Manhattan distance + Linear conflict");
+                Instant start = Instant.now();
+                Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, true);
+                Instant koniec = Instant.now();
+                if (riesenie == null) {
+                    System.out.println("Nema riesenie!");
+                } else {
+                    System.out.println("Beh programu: " + Duration.between(start, koniec));
+                }
+
+            }
+            else {
+                System.out.println("Riesenie hlavolamu zacalo.\nPouzita heuristika: Manhattan distance bez linear conflict");
+                Instant start = Instant.now();
+                Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, false);
+                Instant koniec = Instant.now();
+                if (riesenie == null) {
+                    System.out.println("Nema riesenie!");
+                } else {
+                    System.out.println("Beh programu: " + Duration.between(start, koniec));
+                }
             }
         }
-        System.out.print("\n");
-
-        System.out.println("Running MM manhattanDistance\n--------------------------");
-        Config.LinearConflict = false;
-        {
-            Instant start = Instant.now();
-            Uzol[] riesenie = Algoritmus.start(zaciatok, ciel);
-            Instant koniec = Instant.now();
-            if (riesenie == null) {
-                System.out.println("Nema riesenie!");
-            } else {
-                System.out.println("Run time: " + Duration.between(start, koniec));
-            }
-        }
-        System.out.print("\n");
-        System.out.println("\n==========================");
-
     }
 }

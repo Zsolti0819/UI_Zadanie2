@@ -1,63 +1,49 @@
 public class Uzol implements Comparable<Uzol> {
 
-    private Stav stav;        // The stav for this node
-    private Uzol predchadzajuci;       // Back pointer
-    private Stav.Operator op;  // Operator used to get to this node
-    private int depth;        // Depth of node in search tree
-    private int heuristic;    // Computed heuristic for node stav
-    private int priority;
+    private final Stav stav;
+    private Uzol predchadzajuci;
+    private Stav.Operator operator;
+    private int hlbka;
+    private final int heuristika;
+    private final int priorita;
 
-    /**
-     * @param stav    Main stav associated with this node
-     * @param predchadzajuci  Back pointer
-     * @param op       Operation that led to this node
-     * @param h        Heuristic for node stav
-     */
-    public Uzol(Stav stav, Uzol predchadzajuci, Stav.Operator op, short h) {
+    public Uzol(Stav stav, Uzol predchadzajuci, Stav.Operator operator, int heuristika) {
         this.stav = stav;
         this.predchadzajuci = predchadzajuci;
-        this.op = op;
-        this.heuristic = h;
+        this.operator = operator;
+        this.heuristika = heuristika;
 
-        // Set root node depth to 0, and child node depth to
-        // parent depth + 1
+        // nastavime hlbku prve uzla (koren) na 0
         if (predchadzajuci == null) {
-            this.depth = 0;
-        } else {
-            this.depth = (short)(predchadzajuci.depth + 1);
+            this.hlbka = 0;
+        } else { // ostatne uzli maju hlbku hlbka predka + 1
+            this.hlbka = (short)(predchadzajuci.hlbka + 1);
         }
-        // MM / MMε
-        priority = Math.max(2*depth, depth+heuristic);
+        priorita = Math.max(2* hlbka, hlbka + this.heuristika);
     }
 
     public void setPredchadzajuci(Uzol predchadzajuci) {
         this.predchadzajuci = predchadzajuci;
     }
 
-    /**
-     * @param op  Operator that led to this stav
-     */
-    public void setOp(Stav.Operator op) {
-        this.op = op;
+    public void setOperator(Stav.Operator operator) {
+        this.operator = operator;
     }
 
-    /**
-     * @return  Tree depth plus heuristic
-     */
     public int getFScore() {
-        return depth+heuristic;
+        return hlbka + heuristika;
     }
 
-    public void setDepth(short depth) {
-        this.depth = depth;
+    public void setHlbka(short depth) {
+        this.hlbka = depth;
     }
 
-    public int getDepth() {
-        return depth;
+    public int getHlbka() {
+        return hlbka;
     }
 
-    public int getPriority() {
-        return priority;
+    public int getPriorita() {
+        return priorita;
     }
 
     public Stav getStav() {
@@ -67,7 +53,7 @@ public class Uzol implements Comparable<Uzol> {
     // zo zaciatocneho uzla k aktualnej
     public String pathToString() {
         if (predchadzajuci != null)
-            return predchadzajuci.pathToString() + "\n" + op + "\n" + stav;
+            return predchadzajuci.pathToString() + "\n" + operator + "\n" + stav;
         else
             return "\nInitial Stav:\n" + stav;
     }
@@ -75,26 +61,21 @@ public class Uzol implements Comparable<Uzol> {
     // z aktualnej uzli do cielovej, vynechame prvy
     public String revPathToStringSkipFirst() {
         if (predchadzajuci != null)
-            return "\n" + op.reverse() + "\n" + predchadzajuci.revPathToString();
+            return "\n" + operator.reverse() + "\n" + predchadzajuci.revPathToString();
         else
-            return "\n" + op.reverse() + "\n";
+            return "\n" + operator.reverse() + "\n";
     }
 
     // z aktualnej uzli do cielovej
     public String revPathToString() {
         if (predchadzajuci != null)
-            return stav + "\n" + op.reverse() + "\n" + predchadzajuci.revPathToString();
+            return stav + "\n" + operator.reverse() + "\n" + predchadzajuci.revPathToString();
         else
             return stav.toString();
     }
 
     @Override
     public int compareTo(Uzol otherUzol) {
-        if (this.getFScore() < otherUzol.getFScore())
-            return -1;
-        else if (this.getFScore() == otherUzol.getFScore())
-            return 0;
-        else
-            return 1;
+        return Integer.compare(this.getFScore(), otherUzol.getFScore());
     }
 }
