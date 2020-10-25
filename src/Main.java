@@ -1,58 +1,71 @@
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String args[]) throws FileNotFoundException {
 
-        // nacitanie zaciatocneho stavu zo suboru
-        File zaciatocnyStav = new File("txt/zaciatok.txt");
-        int[][] zaciatocnaTabulka = new int[3][3];
-        Scanner zaciatocnyStavScanner = new Scanner(zaciatocnyStav);
-        while (zaciatocnyStavScanner.hasNextLine()) {
-            String line = zaciatocnyStavScanner.nextLine();
+    public static void main(String[] args) throws IOException {
 
-            if (line.isEmpty())
-                continue;
-
-            Scanner s1 = new Scanner(line);
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    if (s1.hasNextInt()) {
-                        zaciatocnaTabulka[i][j] = s1.nextInt();
-                    }
-                }
+        // Nacitavam zaciatocny stav zo suboru zaciatok.txt
+        // Zistim pocet cisel v subore, a podla toho prekopirujem cisla do dvojrozmerneho pola
+        // Funguje len pre 3x3 a 4x4
+        BufferedReader br;
+        int[] cisla = new int[17];
+        br = new BufferedReader(new FileReader("txt/zaciatok.txt"));
+        int hodnota;
+        int pocetCisel = 0;
+        while ((hodnota = br.read()) != -1) {
+            if (hodnota != ' ')
+            {
+                int cislo = Character.getNumericValue(hodnota);
+                cisla[pocetCisel++] = cislo;
             }
-            s1.close();
         }
-        zaciatocnyStavScanner.close();
+        br.close();
+
+        int odmocninaCisla = (int) Math.sqrt(pocetCisel);
+        int pocetCiselPom = 0;
+
+        int[][] zaciatocnaTabulka = new int[odmocninaCisla][odmocninaCisla];
+        for (int i = 0; i < odmocninaCisla; i++) {
+            for (int j = 0; j < odmocninaCisla; j++)
+                zaciatocnaTabulka[i][j] = cisla[pocetCiselPom++];
+        }
         Stav zaciatok = new Stav(zaciatocnaTabulka);
 
-        // nacitania cieloveho stavu zo suboru
-        File cielovyStav = new File("txt/ciel.txt");
-        int[][] cielovaTabulka = new int[3][3];
-        Scanner cielovyStavStavScanner = new Scanner(cielovyStav);
-        while (cielovyStavStavScanner.hasNextLine()) {
-            String line = cielovyStavStavScanner.nextLine();
 
-            if (line.isEmpty())
-                continue;
-
-            Scanner s2 = new Scanner(line);
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    if (s2.hasNextInt()) {
-                        cielovaTabulka[i][j] = s2.nextInt();
-                    }
-                }
+        // Nacitavam cielovy stav zo suboru ciel.txt
+        // Ostatne su to iste ako pre zaciatok
+        BufferedReader br2;
+        int[] cisla2 = new int[17];
+        br2 = new BufferedReader(new FileReader("txt/ciel.txt"));
+        int hodnota2;
+        int pocetCisel2 = 0;
+        while ((hodnota2 = br2.read()) != -1) {
+            if (hodnota2 != ' ')
+            {
+                int cislo2 = Character.getNumericValue(hodnota2);
+                cisla2[pocetCisel2++] = cislo2;
             }
-            s2.close();
         }
-        cielovyStavStavScanner.close();
+        br2.close();
+
+        int odmocninaCisla2 = (int) Math.sqrt(pocetCisel2);
+        int pocetCiselPom2 = 0;
+
+        int[][] cielovaTabulka = new int[odmocninaCisla2][odmocninaCisla2];
+        for (int i = 0; i < odmocninaCisla2; i++) {
+            for (int j = 0; j < odmocninaCisla2; j++)
+                cielovaTabulka[i][j] = cisla2[pocetCiselPom2++];
+        }
         Stav ciel = new Stav(cielovaTabulka);
+
+        if (pocetCisel == pocetCisel2)
+            System.out.println("GG\n");
+
+        System.out.println("Pocet cisel: "+pocetCisel+"\nPocet cisel 2: "+pocetCisel2);
 
 
         System.out.println("Initial state: \n" + zaciatok + "\n========================\n");

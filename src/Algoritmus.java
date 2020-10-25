@@ -13,8 +13,8 @@ public class Algoritmus {
     // druhy uzol ma smernik, ktory ukazuje na predchadzajuci uzol, az k cielovej pozicii
     public static Uzol[] start(Stav zaciatok, Stav ciel) {
 
-        final int dopredu = 0;        // Forward direction
-        final int dozadu = 1;        // Backward direction
+        final int dopredu = 0;
+        final int dozadu = 1;
         int U = Integer.MAX_VALUE;
 
         int[] smery = {dopredu, dozadu};
@@ -28,13 +28,8 @@ public class Algoritmus {
         Comparator<Uzol> PrioritaNaZakladeHlbky = new Comparator<Uzol>() {
             @Override
             public int compare(Uzol a, Uzol b) {
-                if (a.getDepth() < b.getDepth()) {
-                    return -1;
-                } else if (a.getDepth() == b.getDepth()) {
-                    return 0;
-                } else {
-                    return 1;
-                }	    }
+                return Integer.compare(a.getDepth(), b.getDepth());
+            }
         };
         Comparator<Uzol> CelkovaPriorita = new Comparator<Uzol>() {
             @Override
