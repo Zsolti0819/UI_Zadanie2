@@ -127,11 +127,6 @@ public class Stav {
         return hash;
     }
 
-    /**
-     * @param ciel  Goal state
-     * @return Array of positions for each of the 15 tiles
-     */
-
     // parameter je cielovy stav
     // vrati pole pozicii pre kazdu dlazdicu
     public Pozicia[] vratitSpravnuPoziciu(Stav ciel) {

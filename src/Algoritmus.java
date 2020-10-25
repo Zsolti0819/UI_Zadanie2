@@ -20,9 +20,9 @@ public class Algoritmus {
         int[] smery = {dopredu, dozadu};
 
         // minimalna halda na odstranenie uzla z otvoreneho setu s najmensou prioritou
-        List<Queue<Uzol>> fOpenHeap = new ArrayList<>(2);
-        List<Queue<Uzol>> gOpenHeap = new ArrayList<>(2);
-        List<Queue<Uzol>> prOpenHeap = new ArrayList<>(2);
+        List<Queue<Uzol>> prioritaOtvorenaHalda = new ArrayList<>(2);
+        List<Queue<Uzol>> hlbkaOtvorenaHalda = new ArrayList<>(2);
+        List<Queue<Uzol>> celkovaPrioritaOtvorenaHalda = new ArrayList<>(2);
 
         // Porovnavanie uzlov pomocou Comparatora.
         // Na prioritu nie je potrebne implementovat vlastnu funkciu, lebo java poskytuje tuto funkciu
@@ -39,50 +39,47 @@ public class Algoritmus {
                 return 1;
         };
 
-        // Hash tables with States as keys and Nodes as data for
-        // checking if a state is in the open or closed set.
-        List<Map<Stav, Uzol>> openHash = new ArrayList<>(2);
-        List<Map<Stav, Uzol>> closedHash = new ArrayList<>(2);
+
+        // hash tabulky, ako kluce su stavy uzlov a uzli ako data pre zistenie ci stav je zatvoreny alebo otvoreny set
+        List<Map<Stav, Uzol>> otvorenyHash = new ArrayList<>(2);
+        List<Map<Stav, Uzol>> zatvorenyHash = new ArrayList<>(2);
 
         Stav[] zaciatocny = new Stav[] {zaciatok, ciel};
         Stav[] cielovy = new Stav[] {ciel, zaciatok};
 
-        // For both forward and backward smery
-        for (int i : smery) {
-            // Create empty heap and hash maps
-            fOpenHeap.add(new PriorityQueue<>());
-            gOpenHeap.add(new PriorityQueue<>(PrioritaNaZakladeHlbky));
-            prOpenHeap.add(new PriorityQueue<>(CelkovaPriorita));
-            openHash.add(new HashMap<>());
-            closedHash.add(new HashMap<>());
+        for (int i : smery)
+        {
+            // vytvorime prazdne haldy a hash mapy
+            prioritaOtvorenaHalda.add(new PriorityQueue<>());
+            hlbkaOtvorenaHalda.add(new PriorityQueue<>(PrioritaNaZakladeHlbky));
+            celkovaPrioritaOtvorenaHalda.add(new PriorityQueue<>(CelkovaPriorita));
+            otvorenyHash.add(new HashMap<>());
+            zatvorenyHash.add(new HashMap<>());
 
-            // Add zaciatocny node to the open set
-            Uzol n = new Uzol(zaciatocny[i], null, null, (zaciatocny[i].linearConflict(cielovy[i],linearConflict)));
-            openHash.get(i).put(zaciatocny[i], n);
-            fOpenHeap.get(i).add(n);
-            gOpenHeap.get(i).add(n);
-            prOpenHeap.get(i).add(n);
+            // vlozime prvy uzol do otvoreneho setu
+            Uzol n = new Uzol(zaciatocny[i], null, null, zaciatocny[i].linearConflict(cielovy[i],linearConflict));
+            otvorenyHash.get(i).put(zaciatocny[i], n);
+            prioritaOtvorenaHalda.get(i).add(n);
+            hlbkaOtvorenaHalda.get(i).add(n);
+            celkovaPrioritaOtvorenaHalda.get(i).add(n);
         }
 
 
-        // While there are still elements in the open set
-        while(!fOpenHeap.get(dopredu).isEmpty() && !fOpenHeap.get(dozadu).isEmpty()) {
-            // get minimum priority
-            int fwdPriority = prOpenHeap.get(dopredu).peek().getPriorita();
-            int C = Math.min(fwdPriority, prOpenHeap.get(dozadu).peek().getPriorita());
+        // kym su prvky v otvorenom setu
+        while(!prioritaOtvorenaHalda.get(dopredu).isEmpty() && !prioritaOtvorenaHalda.get(dozadu).isEmpty()) {
+            // uzol s najnizsou prioritou
+            int fwdPriority = celkovaPrioritaOtvorenaHalda.get(dopredu).peek().getPriorita();
+            int C = Math.min(fwdPriority, celkovaPrioritaOtvorenaHalda.get(dozadu).peek().getPriorita());
 
             // stop condition: test U
-            if (U<=Math.max(Math.max(
-                    C,
-                    fOpenHeap.get(dopredu).peek().getFScore()
-            ),Math.max(
-                    fOpenHeap.get(dozadu).peek().getFScore(),
-                    gOpenHeap.get(dopredu).peek().getHlbka()+
-                            gOpenHeap.get(dozadu).peek().getHlbka()+1
+            if (U<=Math.max(Math.max(C, prioritaOtvorenaHalda.get(dopredu).peek().getFScore()),Math.max(
+                    prioritaOtvorenaHalda.get(dozadu).peek().getFScore(),
+                    hlbkaOtvorenaHalda.get(dopredu).peek().getHlbka()+
+                            hlbkaOtvorenaHalda.get(dozadu).peek().getHlbka()+1
             ))) {
 
-                int openNodeCount = openHash.get(dopredu).size() + openHash.get(dozadu).size() + 1;
-                int closedNodeCount = closedHash.get(dopredu).size() + closedHash.get(dozadu).size();
+                int openNodeCount = otvorenyHash.get(dopredu).size() + otvorenyHash.get(dozadu).size() + 1;
+                int closedNodeCount = zatvorenyHash.get(dopredu).size() + zatvorenyHash.get(dozadu).size();
 
                 System.out.print("Vytvorene uzli: " + (openNodeCount + closedNodeCount));
                 System.out.print(" (" + openNodeCount + " otvorene/");
@@ -96,91 +93,79 @@ public class Algoritmus {
             }
 
             // decide direction to expand
-            int dir = (C==fwdPriority) ? dopredu : dozadu;
+            int smer = (C==fwdPriority) ? dopredu : dozadu;
 
             // choose n ∈ OpenF for which prF (n) = prminF and gF (n) is
             // minimum
-            Uzol n = prOpenHeap.get(dir).poll();
+            Uzol n = celkovaPrioritaOtvorenaHalda.get(smer).poll();
 
-
-            // get the state for the selected node
             Stav s = n.getStav();
 
-            // Move the node from the open to closed set, remove from heaps
-            openHash.get(dir).remove(s);
-            closedHash.get(dir).put(s, n);
-            fOpenHeap.get(dir).remove(n);
-            gOpenHeap.get(dir).remove(n);
-            prOpenHeap.get(dir).remove(n);
+            // premiestnime uzol z otvoreneho setu, vlozimo ho to zatvoreneho, a odstranime ho z haldy
+            otvorenyHash.get(smer).remove(s);
+            zatvorenyHash.get(smer).put(s, n);
+            prioritaOtvorenaHalda.get(smer).remove(n);
+            hlbkaOtvorenaHalda.get(smer).remove(n);
+            celkovaPrioritaOtvorenaHalda.get(smer).remove(n);
 
-            // For each of the four possible operators
+            // pre kazdy operator vytvorime stav, ktory je vysledkom posunu
             for (Stav.Operator op : Stav.Operator.values()) {
-                // Create a new state that is the result of the posun
-                Stav newStav = s.posun(op);
+                Stav novyStav = s.posun(op);
 
-                // If the posun is invalid
-                if (newStav == null) {
+                if (novyStav == null)
                     continue;
-                }
 
-                Uzol newUzol = null;
+                Uzol novyUzol;
                 // if c ∈ OpenF ∪ ClosedF and  gF (c) ≤ gF (n) + cost(n, c) then continue
                 {
-                    newUzol = openHash.get(dir).get(newStav);
-                    if (newUzol == null) {
-                        newUzol = closedHash.get(dir).get(newStav);
+                    novyUzol = otvorenyHash.get(smer).get(novyStav);
+                    if (novyUzol == null) {
+                        novyUzol = zatvorenyHash.get(smer).get(novyStav);
                     }
                     // the child is in the open or closed list
-                    if (newUzol != null) {
+                    if (novyUzol != null) {
                         // test if cost is lower now
-                        if (newUzol.getHlbka() <= n.getHlbka() + 1) {
+                        if (novyUzol.getHlbka() <= n.getHlbka() + 1) {
                             continue;
                         }
-                        openHash.get(dir).remove(newStav);
-                        fOpenHeap.get(dir).remove(newUzol);
-                        gOpenHeap.get(dir).remove(newUzol);
-                        prOpenHeap.get(dir).remove(newUzol);
-                        closedHash.get(dir).remove(newStav);
-                        newUzol.setHlbka((short) (n.getHlbka()+1));
-                        newUzol.setPredchadzajuci(n);
-                        newUzol.setOperator(op);
+                        otvorenyHash.get(smer).remove(novyStav);
+                        prioritaOtvorenaHalda.get(smer).remove(novyUzol);
+                        hlbkaOtvorenaHalda.get(smer).remove(novyUzol);
+                        celkovaPrioritaOtvorenaHalda.get(smer).remove(novyUzol);
+                        zatvorenyHash.get(smer).remove(novyStav);
+                        novyUzol.setHlbka((short) (n.getHlbka()+1));
+                        novyUzol.setPredchadzajuci(n);
+                        novyUzol.setOperator(op);
                     }
                 }
 
                 // create new node for this state, if not already found in open/closed lists
-                if (newUzol == null) {
-                    newUzol = new Uzol(newStav, n, op, (newStav.linearConflict(cielovy[dir], linearConflict)));
-                }
+                if (novyUzol == null)
+                    novyUzol = new Uzol(novyStav, n, op, novyStav.linearConflict(cielovy[smer], linearConflict));
 
                 // add c to OpenF
-                openHash.get(dir).put(newStav, newUzol);
-                fOpenHeap.get(dir).add(newUzol);
-                gOpenHeap.get(dir).add(newUzol);
-                prOpenHeap.get(dir).add(newUzol);
+                otvorenyHash.get(smer).put(novyStav, novyUzol);
+                prioritaOtvorenaHalda.get(smer).add(novyUzol);
+                hlbkaOtvorenaHalda.get(smer).add(novyUzol);
+                celkovaPrioritaOtvorenaHalda.get(smer).add(novyUzol);
 
                 // if c ∈ OpenB then U :=min(U,gF(c)+gB(c))
-                Uzol matchedUzol = openHash.get(1-dir).get(newStav);
-                if (matchedUzol != null) {
-                    U = Math.min(U,
-                            matchedUzol.getHlbka() +
-                                    newUzol.getHlbka()
-                    );
-                    if (dir==dopredu) {
-                        System.out.println("Found path: Forward depth:" + newUzol.getHlbka() + " backward depth: " + matchedUzol.getHlbka());
+                Uzol matchedUzol = otvorenyHash.get(1-smer).get(novyStav);
+                if (matchedUzol != null)
+                {
+                    U = Math.min(U, matchedUzol.getHlbka() + novyUzol.getHlbka());
+                    if (smer == dopredu)
+                        System.out.println("Found path: Forward depth:" + novyUzol.getHlbka() + " backward depth: " + matchedUzol.getHlbka());
+                    else
+                        System.out.println("Found path: Forward depth:" + matchedUzol.getHlbka() + " backward depth: " + novyUzol.getHlbka());
 
-
-                    } else {
-                        System.out.println("Found path: Forward depth:" + matchedUzol.getHlbka() + " backward depth: " + newUzol.getHlbka());
-                    }
-                    System.out.println(newUzol.pathToString());
+                    System.out.println(novyUzol.pathToString());
                     System.out.println(matchedUzol.revPathToStringSkipFirst());
 
                 }
             }
-
-
         }
-        return null;    // No solution found
+        return null; // Nema riesenie
     }
 
 }
