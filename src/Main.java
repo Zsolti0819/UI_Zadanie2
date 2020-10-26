@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 public class Main {
     public static int rozmer;
+    public static boolean netrebaRiesit;
 
     public static void main(String[] args) throws IOException {
 
@@ -48,7 +49,7 @@ public class Main {
         int[] cisla2 = new int[50];
         int pocetCisel2 = 0;
         String hodnotaTest2;
-        try (BufferedReader br2 = new BufferedReader(new FileReader("txt/ciel.txt")))
+        try (BufferedReader br2 = new BufferedReader(new FileReader("txt/3x3_01.txt")))
         {
 
             // Read numbers from the line
@@ -79,8 +80,8 @@ public class Main {
 
         if (pocetCisel == pocetCisel2)
         {
-            System.out.println("Zaciatocny stav: \n" + zaciatok + "\n====================\n");
-            System.out.println("Cielovy stav: \n" + ciel + "\n====================\n");
+            System.out.println("Zaciatocny stav: \n" + zaciatok);
+            System.out.println("Cielovy stav: \n" + ciel);
 
             System.out.println("Chcete riesit hlavolam pomocou linear conflict heuristiky? ano/nie");
             Scanner scanner = new Scanner(System.in);
@@ -88,7 +89,7 @@ public class Main {
 
             if (choice.equalsIgnoreCase("ano"))
             {
-                System.out.println("Riesenie hlavolamu zacalo.\nPouzite heuristiky: Manhattan distance + Linear conflict");
+                System.out.println("Riesenie hlavolamu zacalo.\nPouzite heuristiky: Manhattan distance + Linear conflict\n");
                 Instant start = Instant.now();
                 Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, true);
                 Instant koniec = Instant.now();
@@ -99,7 +100,7 @@ public class Main {
 
             }
             else {
-                System.out.println("Riesenie hlavolamu zacalo.\nPouzita heuristika: Manhattan distance bez linear conflict");
+                System.out.println("Riesenie hlavolamu zacalo.\nPouzita heuristika: Manhattan distance");
                 Instant start = Instant.now();
                 Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, false);
                 Instant koniec = Instant.now();

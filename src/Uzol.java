@@ -58,20 +58,43 @@ public class Uzol implements Comparable<Uzol> {
             return "\nZaciatocny  stav:\n" + stav;
     }
 
-    public String cestaNaspatVynechajPrvu()
+    public String cestaNaspatVynechajPrvu(boolean opacne)
     {
-        if (predchadzajuci != null)
-            return "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat();
+        if (!opacne)
+        {
+            if (predchadzajuci != null)
+                return "\n" + operator + "\n" + predchadzajuci.cestaNaspat(false);
+            else
+                return "\n" + operator + "\n";
+        }
         else
-            return "\n" + operator.reverse() + "\n";
+        {
+            if (predchadzajuci != null)
+                return "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat(true);
+            else
+                return "\n" + operator.reverse() + "\n";
+        }
+
     }
 
-    public String cestaNaspat()
+    public String cestaNaspat(boolean opacne)
     {
-        if (predchadzajuci != null)
-            return stav + "\n" + operator + "\n" + predchadzajuci.cestaNaspat();
+        if (!opacne)
+        {
+            if (predchadzajuci != null)
+                return stav + "\n" + operator + "\n" + predchadzajuci.cestaNaspat(false);
+            else
+                return stav.toString();
+        }
         else
-            return stav.toString();
+        {
+            if (predchadzajuci != null)
+                return stav + "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat(true);
+            else
+                return stav.toString();
+
+        }
+
     }
 
     @Override
