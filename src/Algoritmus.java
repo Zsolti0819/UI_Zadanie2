@@ -15,7 +15,6 @@ public class Algoritmus {
 
         final int DOPREDU = 0;
         final int DOZADU = 1;
-        int maxHodnota = Integer.MAX_VALUE;
         boolean stop = false;
         int dlzkaCesty = 0;
 
@@ -42,7 +41,7 @@ public class Algoritmus {
         List<Map<Stav, Uzol>> oHashT = new ArrayList<>(2);
         List<Map<Stav, Uzol>> zHashT = new ArrayList<>(2);
 
-        // Vytovríme dve stavy pre uzli.
+        // Vytovríme dve stavy pre uzly.
         // Začiatočný stav má začiatok a cieľ normálne
         // Cieľový stav začne z cieľa, a jeho cieľ je začiatok, takže má to presne naopak
         Stav[] zaciatocny = new Stav[] {zaciatok, ciel};
@@ -74,16 +73,13 @@ public class Algoritmus {
             int prUzlaDopredu = cprOhalda.get(DOPREDU).peek().getPriorita();
             int prUzlaDozadu = cprOhalda.get(DOZADU).peek().getPriorita();
             int minimumPr = Math.min(prUzlaDopredu, prUzlaDozadu);
-            int max1 = Math.max(minimumPr, prOhalda.get(DOPREDU).peek().getCelkovaPriorita());
-            int max2 = Math.max(prOhalda.get(DOZADU).peek().getCelkovaPriorita(), hlOhalda.get(DOPREDU).peek().getHlbka()+ hlOhalda.get(DOZADU).peek().getHlbka()+1);
 
-            // aby sme nevytvorili nekonecne vela uzlov, mame podmienku
             if (stop)
             {
                 int pocetUzlovOtv = oHashT.get(DOPREDU).size() + oHashT.get(DOZADU).size() + 1;
                 int pocetUzlovZatv = zHashT.get(DOPREDU).size() + zHashT.get(DOZADU).size();
 
-                System.out.print("Vytvorene uzli: " + (pocetUzlovOtv + pocetUzlovZatv));
+                System.out.print("Vytvorene uzly: " + (pocetUzlovOtv + pocetUzlovZatv));
                 System.out.print(" (" + pocetUzlovOtv + " otvorene/");
                 System.out.println(pocetUzlovZatv + " zatvorene)");
                 System.out.println("Dlzka cesty: " + dlzkaCesty);
@@ -91,10 +87,8 @@ public class Algoritmus {
                 return new Uzol[]{};
             }
             else if (dlzkaCesty != 0 && dlzkaCesty<= minimumPr)
-            {
-                System.out.println("maxHodnota >= minimumPr, but not meeting stop condition!!");
                 return null;
-            }
+
 
             int smer;
             if (minimumPr == prUzlaDopredu)
@@ -103,20 +97,20 @@ public class Algoritmus {
             else
                 smer = DOZADU;
 
-            // odstranime uzol z haldy
+            // Odstránime uzol z haldy
             Uzol n = cprOhalda.get(smer).poll();
 
             assert n != null;
             Stav s = n.getStav();
 
-            // premiestnime uzol z otvoreneho setu, vlozimo ho do zatvoreneho, a odstranime ho z haldy
+            // Premiestníme uzol z otvoreného setu, vložíme ho do zatvoreného, a odstránime ho z haldy
             oHashT.get(smer).remove(s);
             zHashT.get(smer).put(s, n);
             prOhalda.get(smer).remove(n);
             hlOhalda.get(smer).remove(n);
             cprOhalda.get(smer).remove(n);
 
-            // pre kazdy operator vytvorime stav, ktory je vysledkom posunu
+            // Pre každý operator vytvoríme stav, ktorý je výsledkom posunu
             for (Stav.Operator op : Stav.Operator.values()) {
                 Stav novyStav = s.posun(op);
 
@@ -129,9 +123,9 @@ public class Algoritmus {
                     if (novyUzol == null) {
                         novyUzol = zHashT.get(smer).get(novyStav);
                     }
-                    // ak uzol je v otvorenom alebo v zatvorenom setu
+                    // Ak uzol je v otvorenom alebo v zatvorenom sete
                     if (novyUzol != null) {
-                        // kontrolujeme, ci hodnota je uz nizsia
+                        // Kontrolujeme, či hodnota je už nižšia
                         if (novyUzol.getHlbka() <= n.getHlbka() + 1) {
                             continue;
                         }
@@ -140,7 +134,7 @@ public class Algoritmus {
                         hlOhalda.get(smer).remove(novyUzol);
                         cprOhalda.get(smer).remove(novyUzol);
                         zHashT.get(smer).remove(novyStav);
-                        novyUzol.setHlbka((short) (n.getHlbka()+1));
+                        novyUzol.setHlbka((n.getHlbka()+1));
                         novyUzol.setPredchadzajuci(n);
                         novyUzol.setOperator(op);
                     }
@@ -162,8 +156,10 @@ public class Algoritmus {
                     stop = true;
                     dlzkaCesty = matchedUzol.getHlbka()+novyUzol.getHlbka();
                     if (dlzkaCesty == 2 && novyUzol.getHlbka() == 1 && matchedUzol.getHlbka() == 1)
+                    {
+                        Main.netrebaRiesit = true;
                         return null;
-
+                    }
 
                     else {
                         if (smer == DOPREDU)
@@ -184,13 +180,13 @@ public class Algoritmus {
                             System.out.println("Hlbka dopredu:" + matchedUzol.getHlbka() + "\nHlbka dozadu: " + novyUzol.getHlbka());
                             System.out.println(matchedUzol.cestaZoStartuKaktualnej());
                             System.out.println("Uzly sa stretli tu. Cielovy stav prveho uzla je zaciatocny stav druheho uzla.");
-                            System.out.println(novyUzol.cestaNaspatVynechajPrvu(true));
+                            System.out.println(novyUzol.cestaNaspatVynechajPrvu(false));
                         }
                     }
 
                 }
             }
         }
-        return null; // Nema riesenie
+        return null; // Nemá riešenie
     }
 }

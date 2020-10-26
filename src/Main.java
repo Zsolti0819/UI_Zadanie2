@@ -49,7 +49,7 @@ public class Main {
         int[] cisla2 = new int[50];
         int pocetCisel2 = 0;
         String hodnotaTest2;
-        try (BufferedReader br2 = new BufferedReader(new FileReader("txt/3x3_01.txt")))
+        try (BufferedReader br2 = new BufferedReader(new FileReader("txt/4x4_08.txt")))
         {
 
             // Read numbers from the line
@@ -94,7 +94,13 @@ public class Main {
                 Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, true);
                 Instant koniec = Instant.now();
                 if (riesenie == null)
-                    System.out.println("Nema riesenie!");
+                {
+                    if (netrebaRiesit)
+                        System.out.println("Hlavolam netreba riesit.");
+                    else
+                        System.out.println("Nema riesenie!");
+                }
+
                 else
                     System.out.println("Beh programu: " + Duration.between(start, koniec));
 
@@ -105,7 +111,12 @@ public class Main {
                 Uzol[] riesenie = Algoritmus.start(zaciatok, ciel, false);
                 Instant koniec = Instant.now();
                 if (riesenie == null)
-                    System.out.println("Nema riesenie!");
+                {
+                    if (netrebaRiesit)
+                        System.out.println("Hlavolam netreba riesit.");
+                    else
+                        System.out.println("Nema riesenie!");
+                }
                 else
                     System.out.println("Beh programu: " + Duration.between(start, koniec));
             }

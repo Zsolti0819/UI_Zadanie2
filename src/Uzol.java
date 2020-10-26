@@ -17,7 +17,7 @@ public class Uzol implements Comparable<Uzol> {
         if (predchadzajuci == null)
             this.hlbka = 0;
         else  // ostatne uzli maju hlbku hlbka predka + 1
-            this.hlbka = (short)(predchadzajuci.hlbka + 1);
+            this.hlbka = predchadzajuci.hlbka + 1;
 
         priorita = Math.max(2* hlbka, hlbka + this.heuristika);
     }
@@ -34,7 +34,7 @@ public class Uzol implements Comparable<Uzol> {
         return hlbka + heuristika;
     }
 
-    public void setHlbka(short depth) {
+    public void setHlbka(int depth) {
         this.hlbka = depth;
     }
 
@@ -94,9 +94,7 @@ public class Uzol implements Comparable<Uzol> {
                 return stav.toString();
 
         }
-
     }
-
     @Override
     public int compareTo(Uzol otherUzol) {
         return Integer.compare(this.getCelkovaPriorita(), otherUzol.getCelkovaPriorita());
