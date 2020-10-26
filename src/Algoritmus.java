@@ -48,7 +48,7 @@ public class Algoritmus {
         Stav[] cielovy = new Stav[] {ciel, zaciatok};
 
         // pre oba smery (DOZADU a DOPREDU)
-        for (int i : smery)
+        for (int i = 0; i < smery.length; i++)
         {
             // Vytvoríme prázdne haldy
             prOhalda.add(new PriorityQueue<>());
@@ -86,9 +86,6 @@ public class Algoritmus {
 
                 return new Uzol[]{};
             }
-            else if (dlzkaCesty != 0 && dlzkaCesty<= minimumPr)
-                return null;
-
 
             int smer;
             if (minimumPr == prUzlaDopredu)
@@ -97,18 +94,18 @@ public class Algoritmus {
             else
                 smer = DOZADU;
 
-            // Odstránime uzol z haldy
-            Uzol n = cprOhalda.get(smer).poll();
+            // Odstránime uzol z otvorenej haldy
+            Uzol novy = cprOhalda.get(smer).poll();
 
-            assert n != null;
-            Stav s = n.getStav();
+            assert novy != null;
+            Stav s = novy.getStav();
 
             // Premiestníme uzol z otvoreného setu, vložíme ho do zatvoreného, a odstránime ho z haldy
             oHashT.get(smer).remove(s);
-            zHashT.get(smer).put(s, n);
-            prOhalda.get(smer).remove(n);
-            hlOhalda.get(smer).remove(n);
-            cprOhalda.get(smer).remove(n);
+            zHashT.get(smer).put(s, novy);
+            prOhalda.get(smer).remove(novy);
+            hlOhalda.get(smer).remove(novy);
+            cprOhalda.get(smer).remove(novy);
 
             // Pre každý operator vytvoríme stav, ktorý je výsledkom posunu
             for (Stav.Operator op : Stav.Operator.values()) {
@@ -126,7 +123,7 @@ public class Algoritmus {
                     // Ak uzol je v otvorenom alebo v zatvorenom sete
                     if (novyUzol != null) {
                         // Kontrolujeme, či hodnota je už nižšia
-                        if (novyUzol.getHlbka() <= n.getHlbka() + 1) {
+                        if (novyUzol.getHlbka() <= novy.getHlbka() + 1) {
                             continue;
                         }
                         oHashT.get(smer).remove(novyStav);
@@ -134,15 +131,15 @@ public class Algoritmus {
                         hlOhalda.get(smer).remove(novyUzol);
                         cprOhalda.get(smer).remove(novyUzol);
                         zHashT.get(smer).remove(novyStav);
-                        novyUzol.setHlbka((n.getHlbka()+1));
-                        novyUzol.setPredchadzajuci(n);
+                        novyUzol.setHlbka((novy.getHlbka()+1));
+                        novyUzol.setPredchadzajuci(novy);
                         novyUzol.setOperator(op);
                     }
                 }
 
-                // vytvorime novy uzol, ak este nie je v otvorenom alebo v zatvorenom setu
+                // Vytvoríme novyUzol, ak este nie je v otvorenom alebo v zatvorenom sete
                 if (novyUzol == null)
-                    novyUzol = new Uzol(novyStav, n, op, novyStav.linearConflict(cielovy[smer], linearConflict));
+                    novyUzol = new Uzol(novyStav, novy, op, novyStav.linearConflict(cielovy[smer], linearConflict));
 
                 // Vložíme ho do hash tabulky a do troch háld
                 oHashT.get(smer).put(novyStav, novyUzol);
@@ -167,9 +164,9 @@ public class Algoritmus {
                             System.out.println("Smer: Dopredu");
                             System.out.println("Hlbka dopredu:" + novyUzol.getHlbka() + "\nHlbka dozadu: " + matchedUzol.getHlbka());
                             System.out.println(novyUzol.cestaZoStartuKaktualnej());
-                            System.out.println("Uzly sa stretli tu. Cielovy stav prveho uzla je zaciatocny stav druheho uzla.\n");
+                            System.out.println("Uzly sa stretli tu. Cielovy stav prveho uzla je zaciatocny stav druheho uzla.");
                             if (matchedUzol.getHlbka() == 0)
-                                System.out.println("Druhy uzol nevykonal ziadne kroky.\n");
+                                System.out.println("Druhy uzol nevykonal ziadne kroky.");
                             else
                                 System.out.println(matchedUzol.cestaNaspatVynechajPrvu(false));
                         }

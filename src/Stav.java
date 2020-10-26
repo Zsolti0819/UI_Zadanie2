@@ -42,7 +42,7 @@ public class Stav {
     public Stav posun(Operator operator) {
         int[][] novaTabulka = new int[Main.rozmer][Main.rozmer];
 
-        // inicializacia novej tabulky na aktualnu
+        // Inicializácia novej tabuľky na aktuálnu
         for (int riadok = 0; riadok < Main.rozmer; riadok++)
             System.arraycopy(Tabulka[riadok], 0, novaTabulka[riadok], 0, Main.rozmer);
 
@@ -52,7 +52,7 @@ public class Stav {
                 if (Tabulka[riadok][stlpec] == 0)
                 {
 
-                    // skusime aplikovat operatora
+                    // Skúsime aplikovať operátora
                     // posunutim dlazdici na urcene miesto
                     switch (operator) {
                         case Hore:
@@ -128,8 +128,6 @@ public class Stav {
         return hash;
     }
 
-    // parameter je cielovy stav
-    // vrati pole pozicii pre kazdu dlazdicu
     public Pozicia[] vratitSpravnuPoziciu(Stav ciel) {
         if (ciel.AktualnaPozicia == null)
         {

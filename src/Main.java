@@ -18,7 +18,7 @@ public class Main {
         try (BufferedReader br = new BufferedReader(new FileReader("txt/zaciatok.txt")))
         {
             // Read numbers from the line
-            while ((hodnotaTest = br.readLine()) != null) { // Stop reading file when -1 is reached
+            while ((hodnotaTest = br.readLine()) != null) {
                 Scanner scanner = new Scanner(hodnotaTest);
                 while (scanner.hasNextInt())
                 {

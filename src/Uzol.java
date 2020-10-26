@@ -16,7 +16,7 @@ public class Uzol implements Comparable<Uzol> {
 
         if (predchadzajuci == null)
             this.hlbka = 0;
-        else  // ostatne uzli maju hlbku hlbka predka + 1
+        else
             this.hlbka = predchadzajuci.hlbka + 1;
 
         priorita = Math.max(2* hlbka, hlbka + this.heuristika);
@@ -55,7 +55,7 @@ public class Uzol implements Comparable<Uzol> {
         if (predchadzajuci != null)
             return predchadzajuci.cestaZoStartuKaktualnej() + "\n" + operator.reverse() + "\n" + stav;
         else
-            return "\nZaciatocny  stav:\n" + stav;
+            return "\nZaciatocny stav:\n" + stav;
     }
 
     public String cestaNaspatVynechajPrvu(boolean opacne)
@@ -92,7 +92,6 @@ public class Uzol implements Comparable<Uzol> {
                 return stav + "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat(true);
             else
                 return stav.toString();
-
         }
     }
     @Override
