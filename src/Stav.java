@@ -175,8 +175,6 @@ public class Stav {
 
         Pozicia[] spravnaPozicia = vratitSpravnuPoziciu(goal);
 
-        // Number or horizontal and vertical conflicts a particular
-        // tile is involved in
         int[][] horizontalneKonflikty = new int[Main.rozmer][Main.rozmer];
         int[][] vertikalneKonflikty = new int[Main.rozmer][Main.rozmer];
 

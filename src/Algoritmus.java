@@ -70,19 +70,13 @@ public class Algoritmus {
         {
             // uzol s najnizsou prioritou
             int prUzlaDopredu = cPrOtvHalda.get(DOPREDU).peek().getPriorita();
-            System.out.println("prUzlaDopredu: "+prUzlaDopredu);
-
             int prUzlaDozadu = cPrOtvHalda.get(DOZADU).peek().getPriorita();
             int minimumPr = Math.min(prUzlaDopredu, prUzlaDozadu);
-
-            System.out.println("prUzlaDozadu: "+prUzlaDozadu);
-            System.out.println("minimumPr: "+minimumPr);
-
             int max1 = Math.max(minimumPr, prOtvHalda.get(DOPREDU).peek().getCelkovaPriorita());
             int max2 = Math.max(prOtvHalda.get(DOZADU).peek().getCelkovaPriorita(), hlbkaOtvHalda.get(DOPREDU).peek().getHlbka()+ hlbkaOtvHalda.get(DOZADU).peek().getHlbka()+1);
             int maximum = Math.max(max1, max2);
 
-            // stop condition: test maxHodnota
+            // aby sme nevytvorili nekonecne vela uzlov, mame podmienku
             if (maxHodnota <= maximum)
             {
                 int pocetUzlovOtv = otvHashT.get(DOPREDU).size() + otvHashT.get(DOZADU).size() + 1;
@@ -95,20 +89,32 @@ public class Algoritmus {
 
                 return new Uzol[]{};
             }
-            else if (maxHodnota <= minimumPr) {
+            else if (maxHodnota <= minimumPr)
+            {
                 System.out.println("maxHodnota >= minimumPr, but not meeting stop condition!!");
                 return null;
             }
 
-            // decide direction to expand
-            int smer = (minimumPr == prUzlaDopredu) ? DOPREDU : DOZADU;
+            int smer;
+            if (minimumPr == prUzlaDopredu)
+            {
+                smer = DOPREDU;
+            }
 
+            else
+            {
+                smer = DOZADU;
+            }
+
+
+
+            // odstranime uzol z haldy
             Uzol n = cPrOtvHalda.get(smer).poll();
 
             assert n != null;
             Stav s = n.getStav();
 
-            // premiestnime uzol z otvoreneho setu, vlozimo ho to zatvoreneho, a odstranime ho z haldy
+            // premiestnime uzol z otvoreneho setu, vlozimo ho do zatvoreneho, a odstranime ho z haldy
             otvHashT.get(smer).remove(s);
             zatvHashT.get(smer).put(s, n);
             prOtvHalda.get(smer).remove(n);
@@ -123,15 +129,14 @@ public class Algoritmus {
                     continue;
 
                 Uzol novyUzol;
-                // if c ∈ OpenF ∪ ClosedF and  gF (c) ≤ gF (n) + cost(n, c) then continue
                 {
                     novyUzol = otvHashT.get(smer).get(novyStav);
                     if (novyUzol == null) {
                         novyUzol = zatvHashT.get(smer).get(novyStav);
                     }
-                    // the child is in the open or closed list
+                    // ak uzol je v otvorenom alebo v zatvorenom setu
                     if (novyUzol != null) {
-                        // test if cost is lower now
+                        // kontrolujeme, ci hodnota je uz nizsia
                         if (novyUzol.getHlbka() <= n.getHlbka() + 1) {
                             continue;
                         }
@@ -146,17 +151,16 @@ public class Algoritmus {
                     }
                 }
 
-                // create new node for this state, if not already found in open/closed lists
+                // vytvorime novy uzol, ak este nie je v otvorenom alebo v zatvorenom setu
                 if (novyUzol == null)
                     novyUzol = new Uzol(novyStav, n, op, novyStav.linearConflict(cielovy[smer], linearConflict));
 
-                // add c to OpenF
+                // vlozime ho do hash tabulky a do 3 haldach
                 otvHashT.get(smer).put(novyStav, novyUzol);
                 prOtvHalda.get(smer).add(novyUzol);
                 hlbkaOtvHalda.get(smer).add(novyUzol);
                 cPrOtvHalda.get(smer).add(novyUzol);
 
-                // if c ∈ OpenB then maxHodnota :=min(maxHodnota,gF(c)+gB(c))
                 Uzol matchedUzol = otvHashT.get(1-smer).get(novyStav);
                 if (matchedUzol != null)
                 {
@@ -168,12 +172,11 @@ public class Algoritmus {
 
                     System.out.println(novyUzol.cestaZoStartuKaktualnej());
                     System.out.println("Uzli sa stretli tu:");
-                    System.out.println(matchedUzol.cestaNaspat());
+                    System.out.println(matchedUzol.cestaNaspatVynechajPrvu());
 
                 }
             }
         }
         return null; // Nema riesenie
     }
-
 }
