@@ -13,21 +13,21 @@ public class Algoritmus {
     // druhy uzol ma smernik, ktory ukazuje na predchadzajuci uzol, az k cielovej pozicii
     public static Uzol[] start(Stav zaciatok, Stav ciel, boolean linearConflict) {
 
-        final int dopredu = 0;
-        final int dozadu = 1;
-        int U = Integer.MAX_VALUE;
+        final int DOPREDU = 0;
+        final int DOZADU = 1;
+        int maxHodnota = Integer.MAX_VALUE;
 
-        int[] smery = {dopredu, dozadu};
+        int[] smery = {DOPREDU, DOZADU};
 
         // minimalna halda na odstranenie uzla z otvoreneho setu s najmensou prioritou
-        List<Queue<Uzol>> prioritaOtvorenaHalda = new ArrayList<>(2);
-        List<Queue<Uzol>> hlbkaOtvorenaHalda = new ArrayList<>(2);
-        List<Queue<Uzol>> celkovaPrioritaOtvorenaHalda = new ArrayList<>(2);
+        List<Queue<Uzol>> prOtvHalda = new ArrayList<>(2);
+        List<Queue<Uzol>> hlbkaOtvHalda = new ArrayList<>(2);
+        List<Queue<Uzol>> cPrOtvHalda = new ArrayList<>(2);
 
         // Porovnavanie uzlov pomocou Comparatora.
         // Pre prioritu nie je potrebne implementovat vlastnu funkciu, lebo java poskytuje tuto funkciu
-        Comparator<Uzol> PrioritaNaZakladeHlbky = Comparator.comparingInt(Uzol::getHlbka);
-        Comparator<Uzol> CelkovaPriorita = (a, b) -> {
+        Comparator<Uzol> HlbkovaHalda = Comparator.comparingInt(Uzol::getHlbka);
+        Comparator<Uzol> CelaHalda = (a, b) -> {
             if (a.getPriorita() < b.getPriorita())
                 return -1;
             else if (a.getPriorita() == b.getPriorita())
@@ -40,71 +40,80 @@ public class Algoritmus {
         // hash tabulky
         // kluce su stavy uzlov
         // uzli su ako data, sluzi na to, aby sme zistili, ci dany stav je v otvorenom alebo zatvorenom setu
-        List<Map<Stav, Uzol>> otvorenyHash = new ArrayList<>(2);
-        List<Map<Stav, Uzol>> zatvorenyHash = new ArrayList<>(2);
+        List<Map<Stav, Uzol>> otvHashT = new ArrayList<>(2);
+        List<Map<Stav, Uzol>> zatvHashT = new ArrayList<>(2);
 
         Stav[] zaciatocny = new Stav[] {zaciatok, ciel};
         Stav[] cielovy = new Stav[] {ciel, zaciatok};
 
+        // pre oba smery (DOZADU a DOPREDU)
         for (int i : smery)
         {
             // vytvorime prazdne haldy
-            prioritaOtvorenaHalda.add(new PriorityQueue<>());
-            hlbkaOtvorenaHalda.add(new PriorityQueue<>(PrioritaNaZakladeHlbky));
-            celkovaPrioritaOtvorenaHalda.add(new PriorityQueue<>(CelkovaPriorita));
+            prOtvHalda.add(new PriorityQueue<>());
+            hlbkaOtvHalda.add(new PriorityQueue<>(HlbkovaHalda));
+            cPrOtvHalda.add(new PriorityQueue<>(CelaHalda));
             // a hash mapy
-            otvorenyHash.add(new HashMap<>());
-            zatvorenyHash.add(new HashMap<>());
+            otvHashT.add(new HashMap<>());
+            zatvHashT.add(new HashMap<>());
 
             // vlozime prvy uzol do otvoreneho setu
             Uzol prvy = new Uzol(zaciatocny[i], null, null, zaciatocny[i].linearConflict(cielovy[i],linearConflict));
-            otvorenyHash.get(i).put(zaciatocny[i], prvy);
-            prioritaOtvorenaHalda.get(i).add(prvy);
-            hlbkaOtvorenaHalda.get(i).add(prvy);
-            celkovaPrioritaOtvorenaHalda.get(i).add(prvy);
+            otvHashT.get(i).put(zaciatocny[i], prvy);
+            prOtvHalda.get(i).add(prvy);
+            hlbkaOtvHalda.get(i).add(prvy);
+            cPrOtvHalda.get(i).add(prvy);
         }
 
         // kym su prvky v otvorenom setu
-        while(!prioritaOtvorenaHalda.get(dopredu).isEmpty() && !prioritaOtvorenaHalda.get(dozadu).isEmpty())
+        while(!prOtvHalda.get(DOPREDU).isEmpty() && !prOtvHalda.get(DOZADU).isEmpty())
         {
             // uzol s najnizsou prioritou
-            int fwdPriority = celkovaPrioritaOtvorenaHalda.get(dopredu).peek().getPriorita();
-            int C = Math.min(fwdPriority, celkovaPrioritaOtvorenaHalda.get(dozadu).peek().getPriorita());
+            int prUzlaDopredu = cPrOtvHalda.get(DOPREDU).peek().getPriorita();
+            System.out.println("prUzlaDopredu: "+prUzlaDopredu);
 
-            // stop condition: test U
-            if (U <= Math.max(Math.max(C, prioritaOtvorenaHalda.get(dopredu).peek().getFScore()),Math.max(prioritaOtvorenaHalda.get(dozadu).peek().getFScore(), hlbkaOtvorenaHalda.get(dopredu).peek().getHlbka()+ hlbkaOtvorenaHalda.get(dozadu).peek().getHlbka()+1)))
+            int prUzlaDozadu = cPrOtvHalda.get(DOZADU).peek().getPriorita();
+            int minimumPr = Math.min(prUzlaDopredu, prUzlaDozadu);
+
+            System.out.println("prUzlaDozadu: "+prUzlaDozadu);
+            System.out.println("minimumPr: "+minimumPr);
+
+            int max1 = Math.max(minimumPr, prOtvHalda.get(DOPREDU).peek().getCelkovaPriorita());
+            int max2 = Math.max(prOtvHalda.get(DOZADU).peek().getCelkovaPriorita(), hlbkaOtvHalda.get(DOPREDU).peek().getHlbka()+ hlbkaOtvHalda.get(DOZADU).peek().getHlbka()+1);
+            int maximum = Math.max(max1, max2);
+
+            // stop condition: test maxHodnota
+            if (maxHodnota <= maximum)
             {
-                int pocetUzlovOtv = otvorenyHash.get(dopredu).size() + otvorenyHash.get(dozadu).size() + 1;
-                int pocetUzlovZatv = zatvorenyHash.get(dopredu).size() + zatvorenyHash.get(dozadu).size();
+                int pocetUzlovOtv = otvHashT.get(DOPREDU).size() + otvHashT.get(DOZADU).size() + 1;
+                int pocetUzlovZatv = zatvHashT.get(DOPREDU).size() + zatvHashT.get(DOZADU).size();
 
                 System.out.print("Vytvorene uzli: " + (pocetUzlovOtv + pocetUzlovZatv));
                 System.out.print(" (" + pocetUzlovOtv + " otvorene/");
                 System.out.println(pocetUzlovZatv + " zatvorene)");
-                System.out.println("Dlzka cesty: " + U);
+                System.out.println("Dlzka cesty: " + maxHodnota);
 
                 return new Uzol[]{};
             }
-            else if (U <= C) {
-                System.out.println("U >= C, but not meeting stop condition!!");
+            else if (maxHodnota <= minimumPr) {
+                System.out.println("maxHodnota >= minimumPr, but not meeting stop condition!!");
                 return null;
             }
 
             // decide direction to expand
-            int smer = (C==fwdPriority) ? dopredu : dozadu;
+            int smer = (minimumPr == prUzlaDopredu) ? DOPREDU : DOZADU;
 
-            // choose n ∈ OpenF for which prF (n) = prminF and gF (n) is
-            // minimum
-            Uzol n = celkovaPrioritaOtvorenaHalda.get(smer).poll();
+            Uzol n = cPrOtvHalda.get(smer).poll();
 
             assert n != null;
             Stav s = n.getStav();
 
             // premiestnime uzol z otvoreneho setu, vlozimo ho to zatvoreneho, a odstranime ho z haldy
-            otvorenyHash.get(smer).remove(s);
-            zatvorenyHash.get(smer).put(s, n);
-            prioritaOtvorenaHalda.get(smer).remove(n);
-            hlbkaOtvorenaHalda.get(smer).remove(n);
-            celkovaPrioritaOtvorenaHalda.get(smer).remove(n);
+            otvHashT.get(smer).remove(s);
+            zatvHashT.get(smer).put(s, n);
+            prOtvHalda.get(smer).remove(n);
+            hlbkaOtvHalda.get(smer).remove(n);
+            cPrOtvHalda.get(smer).remove(n);
 
             // pre kazdy operator vytvorime stav, ktory je vysledkom posunu
             for (Stav.Operator op : Stav.Operator.values()) {
@@ -116,9 +125,9 @@ public class Algoritmus {
                 Uzol novyUzol;
                 // if c ∈ OpenF ∪ ClosedF and  gF (c) ≤ gF (n) + cost(n, c) then continue
                 {
-                    novyUzol = otvorenyHash.get(smer).get(novyStav);
+                    novyUzol = otvHashT.get(smer).get(novyStav);
                     if (novyUzol == null) {
-                        novyUzol = zatvorenyHash.get(smer).get(novyStav);
+                        novyUzol = zatvHashT.get(smer).get(novyStav);
                     }
                     // the child is in the open or closed list
                     if (novyUzol != null) {
@@ -126,11 +135,11 @@ public class Algoritmus {
                         if (novyUzol.getHlbka() <= n.getHlbka() + 1) {
                             continue;
                         }
-                        otvorenyHash.get(smer).remove(novyStav);
-                        prioritaOtvorenaHalda.get(smer).remove(novyUzol);
-                        hlbkaOtvorenaHalda.get(smer).remove(novyUzol);
-                        celkovaPrioritaOtvorenaHalda.get(smer).remove(novyUzol);
-                        zatvorenyHash.get(smer).remove(novyStav);
+                        otvHashT.get(smer).remove(novyStav);
+                        prOtvHalda.get(smer).remove(novyUzol);
+                        hlbkaOtvHalda.get(smer).remove(novyUzol);
+                        cPrOtvHalda.get(smer).remove(novyUzol);
+                        zatvHashT.get(smer).remove(novyStav);
                         novyUzol.setHlbka((short) (n.getHlbka()+1));
                         novyUzol.setPredchadzajuci(n);
                         novyUzol.setOperator(op);
@@ -142,17 +151,17 @@ public class Algoritmus {
                     novyUzol = new Uzol(novyStav, n, op, novyStav.linearConflict(cielovy[smer], linearConflict));
 
                 // add c to OpenF
-                otvorenyHash.get(smer).put(novyStav, novyUzol);
-                prioritaOtvorenaHalda.get(smer).add(novyUzol);
-                hlbkaOtvorenaHalda.get(smer).add(novyUzol);
-                celkovaPrioritaOtvorenaHalda.get(smer).add(novyUzol);
+                otvHashT.get(smer).put(novyStav, novyUzol);
+                prOtvHalda.get(smer).add(novyUzol);
+                hlbkaOtvHalda.get(smer).add(novyUzol);
+                cPrOtvHalda.get(smer).add(novyUzol);
 
-                // if c ∈ OpenB then U :=min(U,gF(c)+gB(c))
-                Uzol matchedUzol = otvorenyHash.get(1-smer).get(novyStav);
+                // if c ∈ OpenB then maxHodnota :=min(maxHodnota,gF(c)+gB(c))
+                Uzol matchedUzol = otvHashT.get(1-smer).get(novyStav);
                 if (matchedUzol != null)
                 {
-                    U = Math.min(U, matchedUzol.getHlbka() + novyUzol.getHlbka());
-                    if (smer == dopredu)
+                    maxHodnota = Math.min(maxHodnota, matchedUzol.getHlbka() + novyUzol.getHlbka());
+                    if (smer == DOPREDU)
                         System.out.println("Found path: Forward depth:" + novyUzol.getHlbka() + " backward depth: " + matchedUzol.getHlbka());
                     else
                         System.out.println("Found path: Forward depth:" + matchedUzol.getHlbka() + " backward depth: " + novyUzol.getHlbka());

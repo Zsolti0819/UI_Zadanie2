@@ -30,7 +30,7 @@ public class Uzol implements Comparable<Uzol> {
         this.operator = operator;
     }
 
-    public int getFScore() {
+    public int getCelkovaPriorita() {
         return hlbka + heuristika;
     }
 
@@ -53,7 +53,7 @@ public class Uzol implements Comparable<Uzol> {
     public String cestaZoStartuKaktualnej()
     {
         if (predchadzajuci != null)
-            return predchadzajuci.cestaZoStartuKaktualnej() + "\n" + operator + "\n" + stav;
+            return predchadzajuci.cestaZoStartuKaktualnej() + "\n" + operator.reverse() + "\n" + stav;
         else
             return "\nZaciatocny  stav:\n" + stav;
     }
@@ -69,13 +69,13 @@ public class Uzol implements Comparable<Uzol> {
     public String cestaNaspat()
     {
         if (predchadzajuci != null)
-            return stav + "\n" + operator.reverse() + "\n" + predchadzajuci.cestaNaspat();
+            return stav + "\n" + operator + "\n" + predchadzajuci.cestaNaspat();
         else
             return stav.toString();
     }
 
     @Override
     public int compareTo(Uzol otherUzol) {
-        return Integer.compare(this.getFScore(), otherUzol.getFScore());
+        return Integer.compare(this.getCelkovaPriorita(), otherUzol.getCelkovaPriorita());
     }
 }
